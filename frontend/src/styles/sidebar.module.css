@@ -1,0 +1,365 @@
+/* Left sidebar cluster: tab switch, search, collections tree, history list. */
+
+/* ---- Sidebar shell ---- */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  min-width: 0;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+}
+
+/* ---- Segmented tab switch ---- */
+.tabSwitch {
+  display: flex;
+  align-items: stretch;
+  flex: 0 0 auto;
+  height: var(--tabstrip-h);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+.tabBtn {
+  position: relative;
+  flex: 1 1 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: color var(--t-fast), background var(--t-fast);
+}
+.tabBtn:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+.tabBtnActive {
+  color: var(--text-primary);
+}
+.tabBtnActive::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent);
+}
+
+/* ---- Search row ---- */
+.searchRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: var(--sp-2);
+  border-bottom: 1px solid var(--border);
+}
+.searchIcon {
+  position: absolute;
+  left: calc(var(--sp-2) + var(--sp-2));
+  color: var(--text-tertiary);
+  pointer-events: none;
+  display: inline-flex;
+}
+.searchInput {
+  width: 100%;
+  height: 28px;
+  padding: 0 var(--sp-2) 0 calc(var(--sp-2) + 20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--t-fast);
+}
+.searchInput:focus {
+  border-color: var(--accent);
+  background: var(--input-bg-focus);
+}
+.searchInput::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* ---- Panel (fills remaining height, scrolls) ---- */
+.panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.panelScroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ---- Collections panel header ---- */
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  height: 30px;
+  padding: 0 var(--sp-2) 0 var(--sp-3);
+}
+.panelTitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+}
+
+/* ---- Tree rows ---- */
+.tree {
+  padding-bottom: var(--sp-2);
+}
+.treeRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  height: var(--row-h);
+  padding-right: var(--sp-2);
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background var(--t-fast);
+}
+.treeRow:hover {
+  background: var(--hover-bg);
+}
+.treeRowSelected {
+  background: var(--selected-bg);
+  border-left-color: var(--accent);
+}
+.treeRowSelected:hover {
+  background: var(--selected-bg);
+}
+.chevronSlot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  flex: 0 0 18px;
+  color: var(--text-tertiary);
+}
+.chevron {
+  transition: transform var(--t-fast);
+}
+.chevronOpen {
+  transform: rotate(90deg);
+}
+.rowIcon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-secondary);
+  flex: 0 0 auto;
+}
+.nodeName {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.nodeNameInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 22px;
+  padding: 0 var(--sp-1);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--input-bg-focus);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+}
+.kebab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  opacity: 0;
+  transition: opacity var(--t-fast), background var(--t-fast);
+}
+.treeRow:hover .kebab,
+.kebabOpen {
+  opacity: 1;
+}
+.kebab:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+.rowSpinner {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+/* ---- Empty state CTA (panel-local) ---- */
+.panelEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  gap: var(--sp-3);
+  padding: var(--sp-6) var(--sp-4);
+  text-align: center;
+  color: var(--text-tertiary);
+}
+.panelEmptyIcon {
+  color: var(--text-tertiary);
+  opacity: 0.5;
+}
+.panelEmptyHeading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.panelEmptySub {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  max-width: 220px;
+  line-height: 1.4;
+}
+.ctaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  height: 30px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--t-fast);
+}
+.ctaBtn:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* ---- History list ---- */
+.historyGroup {
+  display: flex;
+  flex-direction: column;
+}
+.historyGroupHeader {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--sp-2) var(--sp-3) var(--sp-1);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  background: var(--bg-secondary);
+}
+.historyRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--row-h);
+  padding: var(--sp-1) var(--sp-2) var(--sp-1) var(--sp-3);
+  cursor: pointer;
+  transition: background var(--t-fast);
+}
+.historyRow:hover {
+  background: var(--hover-bg);
+}
+.historyUrl {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-primary);
+}
+.historyMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+.historyStatus {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.historyTime {
+  color: var(--text-tertiary);
+}
+.historyDelete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  opacity: 0;
+  transition: opacity var(--t-fast), background var(--t-fast), color var(--t-fast);
+}
+.historyRow:hover .historyDelete {
+  opacity: 1;
+}
+.historyDelete:hover {
+  background: var(--bg-tertiary);
+  color: var(--status-error);
+}
+
+/* On hover, hide meta so delete fits without layout jump on tight widths. */
+.historyRow:hover .historyMeta {
+  display: none;
+}
+
+.clearBtn {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 var(--sp-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.clearBtn:hover {
+  background: var(--hover-bg);
+  color: var(--status-error);
+}

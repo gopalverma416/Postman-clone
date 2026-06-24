@@ -1,0 +1,690 @@
+/* Modals, command palette, and toasts. Tokens only — never hardcode hex. */
+
+/* ==========================================================================
+   Modal scrim + dialog
+   ========================================================================== */
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1500;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 10vh var(--sp-4) var(--sp-4);
+  overflow-y: auto;
+  animation: scrimIn var(--t-fast);
+}
+@keyframes scrimIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.dialog {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  animation: dialogIn var(--t-enter);
+}
+.dialogSm {
+  max-width: 400px;
+}
+.dialogLg {
+  max-width: 760px;
+}
+@keyframes dialogIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--border);
+  flex: 0 0 auto;
+}
+.modalTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.modalClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.modalClose:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+.modalBody {
+  padding: var(--sp-4);
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--border);
+  flex: 0 0 auto;
+}
+
+/* ==========================================================================
+   Form primitives (shared by modals)
+   ========================================================================== */
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-3);
+}
+.formRow:last-child {
+  margin-bottom: 0;
+}
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.input {
+  height: var(--control-h);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 13px;
+  width: 100%;
+  outline: none;
+  transition: border-color var(--t-fast);
+}
+.input:focus {
+  border-color: var(--accent);
+  background: var(--input-bg-focus);
+}
+.input::placeholder {
+  color: var(--text-tertiary);
+}
+.select {
+  height: var(--control-h);
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 13px;
+  width: 100%;
+  outline: none;
+  transition: border-color var(--t-fast);
+}
+.select:focus {
+  border-color: var(--accent);
+}
+.textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--t-fast);
+}
+.textarea:focus {
+  border-color: var(--accent);
+}
+.helpText {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+/* ==========================================================================
+   Buttons (modal-local; mirror common conventions)
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  height: var(--control-h);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+.btn:hover {
+  background: var(--hover-bg);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btnPrimary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btnPrimary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+.btnDanger {
+  background: var(--status-error);
+  border-color: var(--status-error);
+  color: #fff;
+}
+.btnDanger:hover:not(:disabled) {
+  filter: brightness(0.94);
+}
+.btnGhost {
+  background: transparent;
+  border-color: transparent;
+}
+.btnGhost:hover {
+  background: var(--hover-bg);
+}
+
+/* ==========================================================================
+   Tabs (Import/Export, etc.)
+   ========================================================================== */
+.tabRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--sp-4);
+}
+.tab {
+  position: relative;
+  height: var(--subtab-h);
+  padding: 0 var(--sp-3);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+.tab:hover {
+  color: var(--text-primary);
+}
+.tabActive {
+  color: var(--text-primary);
+}
+.tabActive::after {
+  content: '';
+  position: absolute;
+  left: var(--sp-3);
+  right: var(--sp-3);
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+/* ==========================================================================
+   Manage environments two-pane layout
+   ========================================================================== */
+.envLayout {
+  display: flex;
+  gap: var(--sp-3);
+  min-height: 360px;
+}
+.envList {
+  flex: 0 0 200px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  border-right: 1px solid var(--border);
+  padding-right: var(--sp-3);
+  overflow-y: auto;
+}
+.envListItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  height: var(--row-h);
+  padding: 0 var(--sp-2);
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  text-align: left;
+  width: 100%;
+}
+.envListItem:hover {
+  background: var(--hover-bg);
+}
+.envListItemActive {
+  background: var(--selected-bg);
+}
+.envListItemActive::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+.envName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.envListItem .rowDelete {
+  opacity: 0;
+}
+.envListItem:hover .rowDelete {
+  opacity: 1;
+}
+.envEditor {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+/* ==========================================================================
+   Small key/value variable grid (env vars)
+   ========================================================================== */
+.grid {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.gridHead,
+.gridRow {
+  display: grid;
+  grid-template-columns: 28px 1fr 1fr 64px 28px;
+  align-items: center;
+}
+.gridHead {
+  height: var(--row-h);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+.gridHeadCell {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-tertiary);
+  padding: 0 var(--sp-2);
+}
+.gridRow {
+  height: var(--row-h);
+  border-bottom: 1px solid var(--border);
+}
+.gridRow:last-child {
+  border-bottom: none;
+}
+.gridCheck {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gridInput {
+  height: 100%;
+  width: 100%;
+  padding: 0 var(--sp-2);
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  outline: none;
+  border-left: 1px solid var(--border);
+}
+.gridInput:focus {
+  background: var(--input-bg-focus);
+}
+.gridSecret {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  border-left: 1px solid var(--border);
+  height: 100%;
+}
+.rowDelete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-tertiary);
+  transition: color var(--t-fast), background var(--t-fast);
+}
+.rowDelete:hover {
+  color: var(--status-error);
+  background: var(--hover-bg);
+}
+
+/* ==========================================================================
+   Settings
+   ========================================================================== */
+.section {
+  margin-bottom: var(--sp-5);
+}
+.section:last-child {
+  margin-bottom: 0;
+}
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--sp-2);
+}
+.themeToggle {
+  display: flex;
+  gap: var(--sp-2);
+}
+.themeOption {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: var(--control-h);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.themeOption:hover {
+  background: var(--hover-bg);
+}
+.themeOptionActive {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-wash);
+}
+.shortcutList {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.shortcutItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  height: var(--row-h);
+  padding: 0 var(--sp-3);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.shortcutItem:last-child {
+  border-bottom: none;
+}
+.kbd {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+}
+.comingSoonRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: var(--row-h);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.comingSoon {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+.message {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   Toasts (dark even in light theme) — shared with Toast/ToastViewport
+   ========================================================================== */
+.toastViewport {
+  position: fixed;
+  right: var(--sp-4);
+  bottom: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 2000;
+}
+.toast {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  min-width: 280px;
+  max-width: 380px;
+  padding: var(--sp-2) var(--sp-3) var(--sp-2) var(--sp-4);
+  background: var(--toast-bg);
+  color: var(--toast-text);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-toast);
+  overflow: hidden;
+  animation: toastIn var(--t-enter);
+}
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.toastAccent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--accent);
+}
+.toast_success .toastAccent {
+  background: var(--status-success);
+}
+.toast_error .toastAccent {
+  background: var(--status-error);
+}
+.toast_info .toastAccent {
+  background: var(--accent);
+}
+.toastBody {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.toastMessage {
+  font-size: 13px;
+  font-weight: 600;
+}
+.toastDescription {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  word-break: break-word;
+}
+.toastClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color var(--t-fast), background var(--t-fast);
+}
+.toastClose:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ==========================================================================
+   Command palette
+   ========================================================================== */
+.paletteScrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1600;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12vh var(--sp-4) var(--sp-4);
+  animation: scrimIn var(--t-fast);
+}
+.palette {
+  width: 100%;
+  max-width: 560px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 60vh;
+  animation: dialogIn var(--t-enter);
+}
+.paletteInput {
+  height: 48px;
+  padding: 0 var(--sp-4);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 15px;
+  outline: none;
+}
+.paletteInput::placeholder {
+  color: var(--text-tertiary);
+}
+.paletteList {
+  overflow-y: auto;
+  padding: var(--sp-1);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.paletteGroupLabel {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  padding: var(--sp-2) var(--sp-3) var(--sp-1);
+}
+.paletteItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+  height: var(--control-h);
+  padding: 0 var(--sp-3);
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  text-align: left;
+}
+.paletteItemActive {
+  background: var(--hover-bg);
+}
+.paletteItemIcon {
+  color: var(--text-secondary);
+  flex: 0 0 auto;
+}
+.paletteItemLabel {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.paletteItemHint {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  flex: 0 0 auto;
+}
+.paletteEmpty {
+  padding: var(--sp-5);
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}

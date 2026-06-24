@@ -1,0 +1,31 @@
+# Render.com blueprint: deploys the FastAPI backend (web service) and the
+# Next.js frontend (web service). Adjust CORS_ORIGINS / NEXT_PUBLIC_API_BASE_URL
+# to the resulting URLs after the first deploy.
+services:
+  - type: web
+    name: postman-clone-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && python -m app.seed
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SAFE_MODE
+        value: "true"
+      - key: CORS_ORIGINS
+        value: "https://postman-clone-frontend.onrender.com"
+      - key: DATABASE_URL
+        value: "sqlite:///./app.db"
+    disk:
+      name: data
+      mountPath: /opt/render/project/src/backend
+      sizeGB: 1
+
+  - type: web
+    name: postman-clone-frontend
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NEXT_PUBLIC_API_BASE_URL
+        value: "https://postman-clone-backend.onrender.com"

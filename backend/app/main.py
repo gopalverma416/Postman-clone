@@ -32,6 +32,10 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,
+        # Also allow any localhost/127.0.0.1 port for local dev convenience
+        # (e.g. running the frontend on a non-default port). Safe because the
+        # backend proxies outbound requests and uses no cookies/credentials.
+        allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
         allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],

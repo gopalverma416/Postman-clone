@@ -134,22 +134,21 @@ def replace_environment(
 
     env.name = payload.name
 
-    # Drop every existing variable row, then re-insert from the payload.
-    for old in list(env.variables):
-        session.delete(old)
-    session.flush()
-
-    for index, var in enumerate(payload.variables):
-        session.add(
-            EnvironmentVariable(
-                environment_id=env.id,
-                key=var.key,
-                value=var.value,
-                enabled=var.enabled,
-                is_secret=var.secret,
-                sort_order=index,
-            )
+    # Fully replace the variable set. Because the relationship uses
+    # delete-orphan, reassigning the collection drops the old rows and inserts
+    # the new ones in one consistent operation (manually deleting + re-adding the
+    # parent would re-attach the just-deleted instances).
+    env.variables = [
+        EnvironmentVariable(
+            environment_id=env.id,
+            key=var.key,
+            value=var.value,
+            enabled=var.enabled,
+            is_secret=var.secret,
+            sort_order=index,
         )
+        for index, var in enumerate(payload.variables)
+    ]
 
     env.updated_at = utcnow_iso()
     session.add(env)

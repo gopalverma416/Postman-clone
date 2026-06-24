@@ -1,0 +1,167 @@
+/* Workspace shell: top-level layout, top bar, footer, resize handle, env selector. */
+
+/* ---- Shell ---- */
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: var(--app-bg);
+  color: var(--text-primary);
+}
+
+/* ---- Top bar ---- */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-h);
+  flex: 0 0 var(--header-h);
+  padding: 0 var(--sp-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-tertiary);
+}
+.topBarLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.logo {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  flex: 0 0 auto;
+}
+.wordmark {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.01em;
+}
+.topBarRight {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+/* ---- Main split area ---- */
+.panelGroup {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.mainArea {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  background: var(--app-bg);
+}
+.builderPane {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Resize handle ---- */
+.resizeHandle {
+  width: 1px;
+  flex: 0 0 1px;
+  position: relative;
+  background: var(--border);
+  outline: none;
+  transition: background var(--t-fast);
+}
+.resizeHandle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -2px;
+  right: -2px;
+}
+.resizeHandle:hover,
+.resizeHandle[data-resize-handle-active] {
+  background: var(--accent);
+}
+
+/* ---- Footer status bar ---- */
+.footer {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  height: var(--footer-h);
+  flex: 0 0 var(--footer-h);
+  padding: 0 var(--sp-3);
+  border-top: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.footerItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  white-space: nowrap;
+}
+.footerDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status-success);
+  flex: 0 0 auto;
+}
+.footerEnv {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.footerSpacer {
+  flex: 1 1 auto;
+}
+
+/* ---- Environment selector ---- */
+.envSelector {
+  width: 200px;
+}
+.envTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  width: 200px;
+  height: 28px;
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+.envTrigger:hover {
+  border-color: var(--border-strong);
+}
+.envTriggerLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.envTriggerMuted {
+  color: var(--text-tertiary);
+}
+.envItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+}
+.envCheck {
+  width: 16px;
+  flex: 0 0 16px;
+  color: var(--accent);
+}
+.envItemLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
