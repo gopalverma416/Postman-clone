@@ -1,0 +1,140 @@
+/* ==========================================================================
+   Design tokens — the single source of color/spacing/type/elevation.
+   Light theme is the :root default; [data-theme='dark'] overrides colors.
+   The orange accent #FF6C37 is identical in both themes (only hover/pressed shift).
+   ========================================================================== */
+
+:root {
+  /* Brand accent (theme-invariant) */
+  --accent: #ff6c37;
+  --accent-hover: #e05320;
+  --accent-pressed: #c44c28;
+  --accent-ring: rgba(255, 108, 55, 0.4);
+  --accent-wash: rgba(255, 108, 55, 0.08);
+
+  /* Surfaces */
+  --app-bg: #ffffff;
+  --bg-secondary: #fafafa;
+  --bg-tertiary: #f2f2f2;
+  --bg-elevated: #ffffff;
+  --input-bg: #ffffff;
+  --input-bg-focus: #ffffff;
+
+  /* Borders */
+  --border: #e1e1e1;
+  --border-strong: #c4c4c4;
+
+  /* Text */
+  --text-primary: #212121;
+  --text-secondary: #6b6b6b;
+  --text-tertiary: #9e9e9e;
+
+  /* States */
+  --hover-bg: #f2f2f2;
+  --selected-bg: #fff3ef;
+
+  /* Status */
+  --status-success: #0ca14a;
+  --status-redirect: #e8a317;
+  --status-warning: #e8a317;
+  --status-error: #d9534f;
+
+  /* Method label colors (applied to TEXT, uppercase 700) */
+  --method-get: #0cbb52;
+  --method-post: #e6a817;
+  --method-put: #3a8fe8;
+  --method-patch: #8b5cf6;
+  --method-delete: #f0483e;
+  --method-head: #10b1a8;
+  --method-options: #7e8b9b;
+
+  /* Contextual dark surfaces (toasts/tooltips stay dark even in light theme) */
+  --toast-bg: #212121;
+  --toast-text: #ffffff;
+
+  /* Editor */
+  --code-bg: #ffffff;
+
+  /* Scrollbar */
+  --scrollbar-thumb: #c4c4c4;
+  --scrollbar-thumb-hover: #a8a8a8;
+
+  /* Dirty indicator */
+  --dirty-dot: #ff6c37;
+
+  /* Spacing ramp (4px base) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+
+  /* Radii */
+  --radius-sm: 2px;
+  --radius: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  /* Elevation */
+  --shadow-menu: 0 4px 12px rgba(0, 0, 0, 0.18);
+  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-toast: 0 4px 16px rgba(0, 0, 0, 0.3);
+
+  /* Layout sizing */
+  --header-h: 40px;
+  --sidebar-w: 280px;
+  --tabstrip-h: 36px;
+  --urlrow-h: 48px;
+  --subtab-h: 36px;
+  --footer-h: 28px;
+  --row-h: 32px;
+  --control-h: 36px;
+
+  /* Type */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', monospace;
+
+  /* Motion */
+  --t-fast: 120ms ease;
+  --t-enter: 180ms ease-out;
+}
+
+[data-theme='dark'] {
+  --app-bg: #1e1e1e;
+  --bg-secondary: #212121;
+  --bg-tertiary: #2a2a2a;
+  --bg-elevated: #262626;
+  --input-bg: #2a2a2a;
+  --input-bg-focus: #2e2e2e;
+
+  --border: #3a3a3a;
+  --border-strong: #4a4a4a;
+
+  --text-primary: #ececec;
+  --text-secondary: #a0a0a0;
+  --text-tertiary: #6e6e6e;
+
+  --hover-bg: #2f2f2f;
+  --selected-bg: #2e2722;
+
+  --status-success: #48c774;
+  --status-redirect: #ffb224;
+  --status-warning: #ffb224;
+  --status-error: #f36149;
+
+  --method-get: #2ecf6f;
+
+  --toast-bg: #000000;
+  --toast-text: #ffffff;
+
+  --code-bg: #1e1e1e;
+
+  --scrollbar-thumb: #4a4a4a;
+  --scrollbar-thumb-hover: #5a5a5a;
+
+  --shadow-menu: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
