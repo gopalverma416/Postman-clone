@@ -127,13 +127,16 @@ def assemble_request_dto(session: Session, request_row: Request) -> RequestRead:
     auth = _config_json_to_auth(request_row.auth_type, request_row.auth_config)
 
     # Form rows only ever belong to one of the two lists, decided by body_mode.
+    # Expose ALL rows (the per-row `enabled` flag is what controls inclusion at
+    # send time, exactly like params/headers) — filtering disabled rows here would
+    # silently drop them on the next save.
+    form_rows = [_row_to_kv(r) for r in request_row.form_fields]
     form_data: list[KeyValueDTO] = []
     url_encoded: list[KeyValueDTO] = []
-    enabled_form_rows = [_row_to_kv(r) for r in request_row.form_fields if r.enabled]
     if request_row.body_mode == "form-data":
-        form_data = enabled_form_rows
+        form_data = form_rows
     elif request_row.body_mode == "urlencoded":
-        url_encoded = enabled_form_rows
+        url_encoded = form_rows
 
     body = RequestBodyDTO(
         type=_db_body_mode_to_wire(request_row.body_mode),

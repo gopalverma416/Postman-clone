@@ -62,6 +62,11 @@ export function savedRequestToDraft(r: SavedRequest): RequestDraft {
     formData: rowsFromSaved(r.body?.formData),
     urlEncoded: rowsFromSaved(r.body?.urlEncoded),
   };
+  // Preserve any URL fragment so it round-trips through setParams (which rebuilds
+  // the URL from base + params + fragment).
+  const hashIdx = r.url.indexOf('#');
+  const urlFragment = hashIdx === -1 ? undefined : r.url.slice(hashIdx + 1);
+
   return {
     name: r.name,
     method: r.method,
@@ -70,6 +75,7 @@ export function savedRequestToDraft(r: SavedRequest): RequestDraft {
     headers: rowsFromSaved(r.headers),
     auth: r.auth ?? { type: 'none' },
     body,
+    urlFragment,
   };
 }
 

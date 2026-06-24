@@ -5,7 +5,6 @@ import { useMemo, useState } from 'react';
 import { TreeNode } from '@/components/sidebar/TreeNode';
 import type { DropdownItem } from '@/components/common/Dropdown';
 import { requestsApi, importExportApi } from '@/lib/api/client';
-import { newDraft } from '@/lib/buildRequest';
 import { useCollectionsStore } from '@/stores/collectionsStore';
 import { useTabsStore } from '@/stores/tabsStore';
 import { useUiStore } from '@/stores/uiStore';
@@ -114,9 +113,16 @@ export function CollectionTree() {
               onConfirm: () => deleteRequest(r.id),
             })
           }
-          onAddRequest={(collectionId, folderId) =>
-            openModal('saveRequest', { collectionId, folderId, draft: newDraft() })
-          }
+          onAddRequest={(collectionId, folderId) => {
+            // Open a fresh tab targeted at this collection/folder, then save it.
+            // SaveRequestModal operates on a real open tab, so we create one first.
+            const tabsStore = useTabsStore.getState();
+            const tabId = tabsStore.openBlank();
+            useTabsStore.setState((st) => ({
+              tabs: st.tabs.map((t) => (t.id === tabId ? { ...t, collectionId, folderId } : t)),
+            }));
+            openModal('saveRequest', { tabId, collectionId, folderId });
+          }}
           onAddFolder={(collectionId, parentFolderId) => {
             const name = window.prompt(parentFolderId ? 'New subfolder name' : 'New folder name');
             if (name && name.trim()) void createFolder(collectionId, name.trim(), parentFolderId);

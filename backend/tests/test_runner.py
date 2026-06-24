@@ -34,7 +34,7 @@ async def test_basic_get(monkeypatch):
         assert request.url.path == "/get"
         return httpx.Response(200, json={"ok": True}, headers={"content-type": "application/json"})
 
-    monkeypatch.setattr(client_mod, "get_client", lambda: _mock_client(handler))
+    monkeypatch.setattr(client_mod, "get_client", lambda verify=True: _mock_client(handler))
     res = await _run(RequestSpec(method="GET", url="https://api.test/get"))
     assert res.ok and res.response.status == 200
     assert res.response.content_type.startswith("application/json")
@@ -49,7 +49,7 @@ async def test_query_params_merged(monkeypatch):
         seen["query"] = dict(request.url.params)
         return httpx.Response(200, text="ok")
 
-    monkeypatch.setattr(client_mod, "get_client", lambda: _mock_client(handler))
+    monkeypatch.setattr(client_mod, "get_client", lambda verify=True: _mock_client(handler))
     spec = RequestSpec(method="GET", url="https://api.test/x", params=[{"key": "a", "value": "b", "enabled": True}, {"key": "c", "value": "d", "enabled": False}])
     await _run(spec)
     assert seen["query"].get("a") == "b" and "c" not in seen["query"]
@@ -63,7 +63,7 @@ async def test_bearer_auth_header(monkeypatch):
         seen["auth"] = request.headers.get("authorization")
         return httpx.Response(200, text="ok")
 
-    monkeypatch.setattr(client_mod, "get_client", lambda: _mock_client(handler))
+    monkeypatch.setattr(client_mod, "get_client", lambda verify=True: _mock_client(handler))
     spec = RequestSpec(method="GET", url="https://api.test/x", auth={"type": "bearer", "config": {"token": "T"}})
     await _run(spec)
     assert seen["auth"] == "Bearer T"
@@ -78,7 +78,7 @@ async def test_json_body_content_type(monkeypatch):
         seen["body"] = request.content.decode()
         return httpx.Response(201, text="created")
 
-    monkeypatch.setattr(client_mod, "get_client", lambda: _mock_client(handler))
+    monkeypatch.setattr(client_mod, "get_client", lambda verify=True: _mock_client(handler))
     spec = RequestSpec(method="POST", url="https://api.test/x", body={"type": "raw", "language": "json", "raw": '{"a":1}'})
     await _run(spec)
     assert seen["ct"] == "application/json" and seen["body"] == '{"a":1}'
@@ -91,7 +91,7 @@ async def test_redirect_chain(monkeypatch):
             return httpx.Response(302, headers={"location": "https://api.test/b"})
         return httpx.Response(200, text="final")
 
-    monkeypatch.setattr(client_mod, "get_client", lambda: _mock_client(handler))
+    monkeypatch.setattr(client_mod, "get_client", lambda verify=True: _mock_client(handler))
     res = await _run(RequestSpec(method="GET", url="https://api.test/a"))
     assert res.ok and res.response.status == 200 and len(res.response.redirect_chain) == 1
 
@@ -119,6 +119,30 @@ async def test_truncation(monkeypatch):
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, text=big)
 
-    monkeypatch.setattr(client_mod, "get_client", lambda: _mock_client(handler))
+    monkeypatch.setattr(client_mod, "get_client", lambda verify=True: _mock_client(handler))
     res = await _run(RequestSpec(method="GET", url="https://api.test/big"), default_max_bytes=1000)
     assert res.ok and res.response.truncated and res.response.size_bytes == 1000
+
+
+@pytest.mark.anyio
+async def test_binary_application_octet_stream_flagged(monkeypatch):
+    # Regression: application/* must NOT be blanket-treated as textual. A binary
+    # PNG payload served as application/octet-stream should be isBinary=True.
+    png = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x01, 0x02, 0xFF])
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, content=png, headers={"content-type": "application/octet-stream"})
+
+    monkeypatch.setattr(client_mod, "get_client", lambda verify=True: _mock_client(handler))
+    res = await _run(RequestSpec(method="GET", url="https://api.test/bin"))
+    assert res.ok and res.response.is_binary is True and res.response.body is None
+
+
+@pytest.mark.anyio
+async def test_json_still_textual(monkeypatch):
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"x": 1}, headers={"content-type": "application/json"})
+
+    monkeypatch.setattr(client_mod, "get_client", lambda verify=True: _mock_client(handler))
+    res = await _run(RequestSpec(method="GET", url="https://api.test/j"))
+    assert res.ok and res.response.is_binary is False and res.response.body is not None

@@ -13,13 +13,14 @@ interface ResponseBodyProps {
   contentType: string | null;
   mode: 'pretty' | 'raw';
   isBinary?: boolean;
+  sizeBytes?: number;
 }
 
-export function ResponseBody({ body, contentType, mode, isBinary }: ResponseBodyProps) {
+export function ResponseBody({ body, contentType, mode, isBinary, sizeBytes }: ResponseBodyProps) {
   if (isBinary) {
     return (
       <div className={s.emptyResponse}>
-        Binary response — not previewed ({formatSize(body.length)})
+        Binary response — not previewed ({formatSize(sizeBytes ?? body.length)})
       </div>
     );
   }

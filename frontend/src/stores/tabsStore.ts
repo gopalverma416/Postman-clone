@@ -260,10 +260,19 @@ export const useTabsStore = create<TabsState>((set, get) => {
 
         // Optimistic history prepend + reconcile with returned id.
         if (result.historyId) {
+          // Display URL: prefer the response's final URL (post-redirect, params
+          // included); otherwise merge enabled params back onto the base URL so
+          // History doesn't show a bare base. spec.url alone omits the query.
+          const displayUrl =
+            result.response?.finalUrl ||
+            buildUrlFromParams(
+              spec.url,
+              spec.params.map((p) => ({ id: '', key: p.key, value: p.value, enabled: p.enabled })),
+            );
           const entry: HistoryEntry = {
             id: result.historyId,
             method: spec.method,
-            url: spec.url,
+            url: displayUrl,
             status: result.response?.status ?? null,
             ok: result.ok && !!result.response?.ok,
             timeMs: Math.round(result.timingMs),

@@ -21,7 +21,11 @@ _TEXT_HINTS = ("text/", "application/json", "application/xml", "application/java
 
 def _is_textual(content_type: str) -> bool:
     ct = content_type.lower()
-    return any(h in ct for h in _TEXT_HINTS) or ct == "" or ct.startswith("application/")
+    # Only an explicit allowlist of text-ish types (or a missing content-type) is
+    # treated as textual. A blanket `application/*` match would wrongly decode
+    # binary payloads (application/pdf, /zip, /octet-stream, /x-protobuf) as
+    # garbage text and report isBinary=false.
+    return any(h in ct for h in _TEXT_HINTS) or ct == ""
 
 
 def _decode_body(raw: bytes, content_type: str, charset: str | None) -> tuple[str | None, bool]:
@@ -53,7 +57,7 @@ async def execute(spec: RequestSpec, options: RunOptions, *, default_timeout_ms:
     block_private = options.block_private_hosts if options.block_private_hosts is not None else safe_default
     follow = options.follow_redirects
 
-    client = get_client()
+    client = get_client(verify=options.verify_tls)
     t0 = time.perf_counter()
     try:
         final_url = build_final_url(spec)

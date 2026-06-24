@@ -106,13 +106,31 @@ def build_httpx_request(
     else:
         raise RunnerException("UNSUPPORTED_BODY", f"Unsupported body type '{mode}'.", {"type": mode})
 
+    # --- strip stale entity headers when there is no body ---
+    # On a method-switched redirect (303, or 301/302 from a non-GET) the executor
+    # sets body.type='none'. Any user-supplied Content-Length/Content-Type would
+    # then mis-frame the bodyless request, so drop them here.
+    body_is_empty = mode == "none" or (mode == "raw" and not (spec.body.raw or ""))
+    if mode == "none":
+        for name in ("content-length", "content-type"):
+            idx = _find_header_idx(headers, name)
+            if idx >= 0:
+                headers.pop(idx)
+    else:
+        # A user Content-Length is never trustworthy (httpx sets the correct one).
+        cl_idx = _find_header_idx(headers, "content-length")
+        if cl_idx >= 0:
+            headers.pop(cl_idx)
+
     # --- finalize Content-Type ---
     user_ct_idx = _find_header_idx(headers, "content-type")
     if mode == "form-data":
         # Strip any user Content-Type so httpx can set the boundary-bearing one.
         if user_ct_idx >= 0:
             headers.pop(user_ct_idx)
-    else:
+    elif mode != "none":
+        # raw/urlencoded: declare the proposed Content-Type unless the user set one.
+        # (An empty raw body still declares its type, matching Postman.)
         if user_ct_idx < 0 and proposed_ct is not None:
             headers.append(["Content-Type", proposed_ct])
 

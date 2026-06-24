@@ -42,6 +42,9 @@ def _to_dto(row: HistoryEntry) -> HistoryRead:
 
     response_preview: RunResponse | None = None
     if row.status_code is not None:
+        # A binary response was stored with no text body but a non-zero size; infer
+        # the flag so the UI shows the "binary, not previewed" notice on reopen.
+        is_binary = (row.response_body is None or row.response_body == "") and (row.response_size_bytes or 0) > 0
         response_preview = RunResponse(
             status=row.status_code,
             reason=row.status_text or "",
@@ -49,7 +52,7 @@ def _to_dto(row: HistoryEntry) -> HistoryRead:
             headers=json.loads(row.response_headers or "[]"),
             content_type=row.response_content_type,
             body=row.response_body,
-            is_binary=False,
+            is_binary=is_binary,
             truncated=False,
             size_bytes=row.response_size_bytes or 0,
             declared_content_length=None,

@@ -117,6 +117,7 @@ export function ResponsePanel({ tabId }: { tabId: string }) {
           contentType={res.contentType}
           mode={tab.responseSubTab === 'raw' ? 'raw' : 'pretty'}
           isBinary={res.isBinary}
+          sizeBytes={res.sizeBytes}
         />
       )}
     </div>

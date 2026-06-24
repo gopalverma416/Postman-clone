@@ -46,6 +46,38 @@ def test_request_save_and_body_token_roundtrip(client):
     assert got["params"][0]["key"] == "a"
 
 
+def test_disabled_form_rows_preserved(client):
+    # Regression: a disabled form row must survive a read->save round-trip
+    # (not silently dropped), exactly like params/headers.
+    col = client.post("/api/collections", json={"name": "C"}).json()
+    payload = {
+        "collectionId": col["id"],
+        "name": "R",
+        "method": "POST",
+        "url": "https://x/y",
+        "params": [],
+        "headers": [],
+        "auth": {"type": "none"},
+        "body": {
+            "type": "x-www-form-urlencoded",
+            "raw": "",
+            "rawLang": "json",
+            "formData": [],
+            "urlEncoded": [
+                {"key": "on", "value": "1", "enabled": True},
+                {"key": "off", "value": "2", "enabled": False},
+            ],
+        },
+    }
+    sr = client.post(f"/api/collections/{col['id']}/requests", json=payload).json()
+    rows = sr["body"]["urlEncoded"]
+    assert len(rows) == 2, rows
+    assert any(r["key"] == "off" and r["enabled"] is False for r in rows)
+    # Reload preserves it too.
+    got = client.get(f"/api/requests/{sr['id']}").json()
+    assert len(got["body"]["urlEncoded"]) == 2
+
+
 def test_environment_activate_and_replace(client):
     e1 = client.post("/api/environments", json={"name": "E1", "variables": [{"key": "base_url", "value": "u", "enabled": True}]}).json()
     assert e1["variables"][0]["key"] == "base_url"

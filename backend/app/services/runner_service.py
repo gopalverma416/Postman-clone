@@ -95,12 +95,18 @@ def _record_history(run_req: RunRequest, resolved_spec: RequestSpec, result: Run
         body = (resp.body or "")[:_HISTORY_BODY_CAP]
         headers_json = json.dumps(resp.headers)
 
+    # Display URL = base + merged enabled params (the spec.url alone drops the
+    # query string, since params live in spec.params). Keeps History readable.
+    from app.runner.builder import build_final_url
+
+    display_url = build_final_url(resolved_spec) or resolved_spec.url
+
     entry = HistoryEntry(
         workspace_id=workspace_id,
         request_id=run_req.request_id,
         environment_id=run_req.environment_id,
         method=resolved_spec.method,
-        url=resolved_spec.url,
+        url=display_url,
         request_snapshot=resolved_spec.model_dump_json(by_alias=True),
         status_code=resp.status if resp else None,
         status_text=resp.reason if resp else None,
