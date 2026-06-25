@@ -29,17 +29,29 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     app = FastAPI(title=settings.app_name, version=settings.app_version, lifespan=lifespan)
 
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.cors_origin_list,
-        # Also allow any localhost/127.0.0.1 port for local dev convenience
-        # (e.g. running the frontend on a non-default port). Safe because the
-        # backend proxies outbound requests and uses no cookies/credentials.
-        allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
-        allow_credentials=False,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+    if settings.cors_allow_all:
+        # CORS_ORIGINS='*' → allow any origin. Safe: the backend is a credential-less
+        # proxy (no cookies), so wildcard CORS exposes nothing extra. Lets the
+        # deployed frontend talk to the backend without hardcoding its URL.
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=False,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    else:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.cors_origin_list,
+            # Also allow any localhost/127.0.0.1 port for local dev convenience
+            # (e.g. running the frontend on a non-default port). Safe because the
+            # backend proxies outbound requests and uses no cookies/credentials.
+            allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
+            allow_credentials=False,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
 
     # --- exception handlers ---
     @app.exception_handler(ApiError)

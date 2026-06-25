@@ -44,6 +44,13 @@ class Settings(BaseSettings):
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
+    @property
+    def cors_allow_all(self) -> bool:
+        """True when CORS_ORIGINS is '*' — allow any origin. Safe here because the
+        backend is a credential-less proxy (no cookies), so wildcard CORS exposes
+        nothing a user couldn't already do with curl."""
+        return "*" in self.cors_origin_list
+
 
 @lru_cache
 def get_settings() -> Settings:

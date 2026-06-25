@@ -251,11 +251,13 @@ Frontend correctness is enforced by TypeScript strict mode (`npm run build` type
 
 ## Deployment
 
-- **Frontend** → Vercel / Netlify. Set `NEXT_PUBLIC_API_BASE_URL` to the deployed backend URL.
-- **Backend** → Render / Railway / Fly. `pip install -r requirements.txt` then `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Run `python -m app.seed` once. Set `CORS_ORIGINS` to the deployed frontend origin (any `localhost`/`127.0.0.1` port is allowed automatically in dev). Consider `SAFE_MODE=true` in production.
-- A `render.yaml` blueprint and a backend `Dockerfile` are included.
+**See [DEPLOY.md](./DEPLOY.md) for step-by-step instructions.** In short:
 
-> SQLite persists to a file; on ephemeral hosts mount a disk or switch the `DATABASE_URL` to Postgres (SQLModel makes this a small change).
+- **Backend** → Render (free web service). Build `pip install -r requirements.txt`; start `python -m app.seed; uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Env: `SAFE_MODE=true`, `CORS_ORIGINS=*`, `DATABASE_URL=sqlite:////var/data/app.db` (+ a 1 GB disk at `/var/data` for persistence).
+- **Frontend** → Vercel (root dir `frontend`). Env: `NEXT_PUBLIC_API_BASE_URL` = the backend's live URL. (It's baked at build time — redeploy after changing it.)
+- `CORS_ORIGINS=*` is safe here because the backend is a credential-less proxy (no cookies). A `render.yaml` Blueprint (deploys both) and a backend `Dockerfile` are included.
+
+> SQLite persists to a file; on ephemeral hosts mount a disk (as above) or switch `DATABASE_URL` to Postgres (SQLModel makes this a small change).
 
 ---
 

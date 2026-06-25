@@ -1,31 +1,42 @@
-# Render.com blueprint: deploys the FastAPI backend (web service) and the
-# Next.js frontend (web service). Adjust CORS_ORIGINS / NEXT_PUBLIC_API_BASE_URL
-# to the resulting URLs after the first deploy.
+# Render.com Blueprint — deploys BOTH the FastAPI backend and the Next.js frontend.
+#
+# One-click: in Render → "New +" → "Blueprint" → pick this repo. Render reads this
+# file and creates both services. After the FIRST deploy, set the frontend's
+# NEXT_PUBLIC_API_BASE_URL to the backend's live URL (shown in the backend service),
+# then redeploy the frontend. (CORS is wildcard so the backend needs no change.)
 services:
+  # ---------------- Backend (proxy/runner + API) ----------------
   - type: web
     name: postman-clone-backend
     runtime: python
     rootDir: backend
-    buildCommand: pip install -r requirements.txt && python -m app.seed
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # Seed runs at startup (idempotent — skips if already seeded) so it executes
+    # against the mounted persistent disk, not the ephemeral build filesystem.
+    startCommand: python -m app.seed; uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: SAFE_MODE
-        value: "true"
+        value: "true"          # block private/loopback/metadata IPs in production
       - key: CORS_ORIGINS
-        value: "https://postman-clone-frontend.onrender.com"
+        value: "*"             # safe: credential-less proxy; no per-URL coordination
       - key: DATABASE_URL
-        value: "sqlite:///./app.db"
+        value: "sqlite:////var/data/app.db"
     disk:
       name: data
-      mountPath: /opt/render/project/src/backend
+      mountPath: /var/data     # SQLite file persists across deploys/restarts
       sizeGB: 1
 
+  # ---------------- Frontend (Next.js) ----------------
   - type: web
     name: postman-clone-frontend
     runtime: node
     rootDir: frontend
+    plan: free
     buildCommand: npm install && npm run build
     startCommand: npm run start
     envVars:
       - key: NEXT_PUBLIC_API_BASE_URL
+        # ⚠️ After the backend's first deploy, replace this with its real URL
+        # (e.g. https://postman-clone-backend.onrender.com), then redeploy.
         value: "https://postman-clone-backend.onrender.com"
